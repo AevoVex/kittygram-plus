@@ -4,6 +4,15 @@
 
 **Базовый URL:** `http://localhost:8080/api/`.
 
+## Интерактивная документация
+
+- Swagger UI: `GET /api/docs/`
+- ReDoc: `GET /api/redoc/`
+- OpenAPI 3 схема: `GET /api/schema/`
+
+Страницы документации доступны без авторизации. Для защищённых запросов в Swagger UI
+нужно указать JWT в формате `Bearer <access_token>`.
+
 Все маршруты требуют заголовок:
 
 ```http

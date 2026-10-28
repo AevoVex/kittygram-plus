@@ -34,6 +34,12 @@ class CollectionAPITests(APITestCase):
             HTTP_AUTHORIZATION=f'Bearer {RefreshToken.for_user(user).access_token}'
         )
 
+    def test_openapi_schema_and_swagger_are_public(self):
+        schema = self.client.get('/api/schema/')
+        self.assertEqual(schema.status_code, 200)
+        swagger = self.client.get('/api/docs/')
+        self.assertEqual(swagger.status_code, 200)
+
     def create_collection(self, title='Коты из приютов'):
         self.login(self.owner)
         response = self.client.post(

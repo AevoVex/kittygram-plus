@@ -187,6 +187,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: publish
     environment: production
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
     steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.2
@@ -195,10 +197,30 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          envs: DOCKER_USERNAME
           script: |
             set -eu
-            cd ~/kittygram-plus
+            app_dir="$HOME/kittygram-plus"
+            if [ ! -d "$app_dir/.git" ]; then
+              git clone --depth 1 https://github.com/AevoVex/kittygram-plus.git "$app_dir"
+            else
+              git -C "$app_dir" pull --ff-only origin main
+            fi
+            cd "$app_dir"
+
+            if [ ! -f .env ]; then
+              umask 077
+              db_password="$(openssl rand -hex 24)"
+              django_secret="$(openssl rand -hex 32)"
+              printf '%s\n' \
+                'DJANGO_DEBUG=0' \
+                "DJANGO_SECRET_KEY=$django_secret" \
+                'DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1' \
+                'POSTGRES_DB=kittygram' \
+                'POSTGRES_USER=kittygram' \
+                "POSTGRES_PASSWORD=$db_password" \
+                "DOCKER_USERNAME=$DOCKER_USERNAME" > .env
+            fi
+
             docker compose -f docker-compose.production.yml pull
             docker compose -f docker-compose.production.yml up -d --force-recreate
-            docker compose -f docker-compose.production.yml exec -T backend python manage.py migrate --no-input
-            docker compose -f docker-compose.production.yml exec -T backend python manage.py collectstatic --no-input

@@ -25,8 +25,8 @@ ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
-    'rest_framework', 'rest_framework.authtoken', 'django_filters', 'djoser', 'cats',
-    'collaborations',
+    'rest_framework', 'rest_framework.authtoken', 'django_filters', 'djoser',
+    'drf_spectacular', 'drf_spectacular_sidecar', 'cats', 'collaborations',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,10 +83,21 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Kittygram Plus API',
+    'DESCRIPTION': 'REST API Kittygram Plus, включая совместные подборки котиков.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
 }
 DJOSER = {
     'LOGIN_FIELD': 'username',

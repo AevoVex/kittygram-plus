@@ -25,6 +25,7 @@ docker compose up -d --build
 ## API-документация и проверка
 
 - [Контракт API совместных подборок](docs/API_COLLABORATIVE_COLLECTIONS.md)
+- Swagger UI: [`/api/docs/`](http://localhost:8080/api/docs/); OpenAPI-схема: [`/api/schema/`](http://localhost:8080/api/schema/)
 - [Postman-коллекция](postman/Kittygram%20Collaborative%20Collections.postman_collection.json)
 - [Полный Postman-прогон всех вариантов](postman/Kittygram%20Full%20API%20Run.postman_collection.json)
 - [Инструкция по Docker и локальной проверке](docs/DOCKER_VERIFICATION.md)
@@ -50,9 +51,10 @@ Production compose использует готовые образы из Docker 
 ```bash
 docker compose -f docker-compose.production.yml pull
 docker compose -f docker-compose.production.yml up -d
-docker compose -f docker-compose.production.yml exec backend python manage.py migrate --no-input
-docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input
 ```
+
+`backend` сам последовательно выполняет миграции и `collectstatic` в entrypoint;
+не запускайте эти команды параллельно через `docker compose exec`.
 
 ## CI/CD
 
@@ -62,6 +64,6 @@ Workflow находится в [`.github/workflows/main.yml`](../.github/workflo
 - `kittygram_plus_frontend`
 - `kittygram_plus_gateway`
 
-После публикации workflow может выполнить деплой по SSH. Для этого в GitHub Secrets нужны `DOCKER_USERNAME`, `DOCKER_PASSWORD`, `HOST`, `USER`, `SSH_KEY`, `SSH_PASSPHRASE`. На сервере репозиторий должен находиться в `~/kittygram`.
+После публикации workflow может выполнить деплой по SSH. Для этого в GitHub Secrets нужны `DOCKER_USERNAME`, `DOCKER_PASSWORD`, `HOST`, `USER`, `SSH_KEY`, `SSH_PASSPHRASE`. На сервере репозиторий находится в `~/kittygram-plus`.
 
 CI check
