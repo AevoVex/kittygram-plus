@@ -1,13 +1,7 @@
-venv/
-.venv/
-.git/
 __pycache__/
 *.py[cod]
-*.sqlite3
 .local-secret
-.env
+*.sqlite3
 media/
-staticfiles/
 backend_static/
-frontend/node_modules/
-frontend/build/
+.pytest_cache/

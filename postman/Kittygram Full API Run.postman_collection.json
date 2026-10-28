@@ -1,0 +1,52 @@
+{
+  "info": {
+    "name": "Kittygram - Full collaborative collections run",
+    "description": "Полный ручной прогон всех маршрутов подборок, ролей, котиков и заявок. Сначала выполните 01, затем папки по порядку. Перед каждым новым полным прогоном запустите seed_collaborations_demo --reset.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key":"baseUrl","value":"http://localhost:8080"},
+    {"key":"password","value":"Demo-Collaboration-42!"},
+    {"key":"ownerToken","value":""},{"key":"editorToken","value":""},{"key":"viewerToken","value":""},{"key":"guestOneToken","value":""},{"key":"guestTwoToken","value":""},
+    {"key":"collectionId","value":"1"},{"key":"editorId","value":"2"},{"key":"guestOneId","value":"4"},{"key":"ownerCatId","value":"1"},{"key":"editorCatId","value":"6"},{"key":"guestOneCatId","value":"16"},{"key":"guestTwoCatId","value":"17"},{"key":"proposalOneId","value":"1"},{"key":"proposalTwoId","value":"2"},{"key":"scratchCollectionId","value":""}
+  ],
+  "item": [
+    {"name":"01 Auth - run all first","item":[
+      {"name":"Owner JWT 200","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"username\":\"demo_owner\",\"password\":\"{{password}}\"}"},"url":"{{baseUrl}}/auth/jwt/create/"},"event":[{"listen":"test","script":{"exec":["pm.test('200',()=>pm.response.to.have.status(200));pm.collectionVariables.set('ownerToken',pm.response.json().access);"]}}]},
+      {"name":"Editor JWT 200","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"username\":\"demo_editor\",\"password\":\"{{password}}\"}"},"url":"{{baseUrl}}/auth/jwt/create/"},"event":[{"listen":"test","script":{"exec":["pm.test('200',()=>pm.response.to.have.status(200));pm.collectionVariables.set('editorToken',pm.response.json().access);"]}}]},
+      {"name":"Viewer JWT 200","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"username\":\"demo_viewer\",\"password\":\"{{password}}\"}"},"url":"{{baseUrl}}/auth/jwt/create/"},"event":[{"listen":"test","script":{"exec":["pm.test('200',()=>pm.response.to.have.status(200));pm.collectionVariables.set('viewerToken',pm.response.json().access);"]}}]},
+      {"name":"Guest 1 JWT 200","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"username\":\"demo_guest_one\",\"password\":\"{{password}}\"}"},"url":"{{baseUrl}}/auth/jwt/create/"},"event":[{"listen":"test","script":{"exec":["pm.test('200',()=>pm.response.to.have.status(200));pm.collectionVariables.set('guestOneToken',pm.response.json().access);"]}}]},
+      {"name":"Guest 2 JWT 200","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"username\":\"demo_guest_two\",\"password\":\"{{password}}\"}"},"url":"{{baseUrl}}/auth/jwt/create/"},"event":[{"listen":"test","script":{"exec":["pm.test('200',()=>pm.response.to.have.status(200));pm.collectionVariables.set('guestTwoToken',pm.response.json().access);"]}}]}
+    ]},
+    {"name":"02 Collections CRUD and filters","item":[
+      {"name":"No token list - 401","request":{"method":"GET","url":"{{baseUrl}}/api/collections/"}},
+      {"name":"Owner list and pagination - 200","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"}],"url":"{{baseUrl}}/api/collections/?role=owner&page=1"}},
+      {"name":"Invalid role filter - 400","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"}],"url":"{{baseUrl}}/api/collections/?role=invalid"}},
+      {"name":"Create scratch collection - 201","event":[{"listen":"prerequest","script":{"exec":["pm.collectionVariables.set('scratchTitle','PM '+Date.now());"]}},{"listen":"test","script":{"exec":["pm.test('201',()=>pm.response.to.have.status(201));pm.collectionVariables.set('scratchCollectionId',pm.response.json().id);"]}}],"request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"title\":\"{{scratchTitle}}\",\"description\":\"Postman scratch\"}"},"url":"{{baseUrl}}/api/collections/"}},
+      {"name":"Owner patch scratch - 200","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"description\":\"updated\"}"},"url":"{{baseUrl}}/api/collections/{{scratchCollectionId}}/"}},
+      {"name":"Guest reads scratch - 403","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{guestOneToken}}"}],"url":"{{baseUrl}}/api/collections/{{scratchCollectionId}}/"}},
+      {"name":"Owner deletes scratch - 204","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"}],"url":"{{baseUrl}}/api/collections/{{scratchCollectionId}}/"}}
+    ]},
+    {"name":"03 Members and roles","item":[
+      {"name":"Member list - 200","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/"}},
+      {"name":"Duplicate editor invite - 400","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"user_id\":{{editorId}},\"role\":\"editor\"}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/"}},
+      {"name":"Editor invite forbidden - 403","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"user_id\":{{guestOneId}},\"role\":\"viewer\"}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/"}},
+      {"name":"Owner invites guest - 201","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"user_id\":{{guestOneId}},\"role\":\"viewer\"}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/"}},
+      {"name":"Owner changes guest role - 200","request":{"method":"PATCH","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"role\":\"editor\"}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/{{guestOneId}}/"}},
+      {"name":"Owner removes guest - 204","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{ownerToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/members/{{guestOneId}}/"}}
+    ]},
+    {"name":"04 Cats and permissions","item":[
+      {"name":"Editor adds own cat - 201","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"cat_id\":{{editorCatId}}}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/cats/"}},
+      {"name":"Viewer removes cat - 403","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{viewerToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/cats/{{editorCatId}}/"}},
+      {"name":"Editor removes cat - 204","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/cats/{{editorCatId}}/"}}
+    ]},
+    {"name":"05 Proposals","item":[
+      {"name":"Viewer lists proposals - 403","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{viewerToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/proposals/"}},
+      {"name":"Editor lists proposals - 200","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/proposals/"}},
+      {"name":"Guest proposes foreign cat - 403","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{guestOneToken}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"cat_id\":{{ownerCatId}}}"},"url":"{{baseUrl}}/api/collections/{{collectionId}}/proposals/"}},
+      {"name":"Editor approves guest proposal - 200","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/proposals/{{proposalOneId}}/approve/"}},
+      {"name":"Approve reviewed proposal - 400","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"}],"url":"{{baseUrl}}/api/collections/{{collectionId}}/proposals/{{proposalOneId}}/approve/"}},
+      {"name":"Editor rejects second proposal - 200","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{editorToken}}"}],"url":"{{baseUrl}}/api/collections/2/proposals/{{proposalTwoId}}/reject/"}}
+    ]}
+  ]
+}

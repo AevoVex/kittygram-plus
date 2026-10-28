@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
-    env_file: .env
+    env_file: ${ENV_FILE:-.env}
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -13,7 +13,7 @@ services:
 
   backend:
     build: ./backend/
-    env_file: .env
+    env_file: ${ENV_FILE:-.env}
     environment:
       DB_HOST: db
       DB_PORT: "5432"

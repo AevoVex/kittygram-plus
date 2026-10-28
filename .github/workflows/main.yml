@@ -7,12 +7,14 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'gateway/**'
+      - 'docker-compose*.yml'
       - '.github/workflows/main.yml'
   pull_request:
     paths:
       - 'backend/**'
       - 'frontend/**'
       - 'gateway/**'
+      - 'docker-compose*.yml'
       - '.github/workflows/main.yml'
   workflow_dispatch:
 
@@ -79,7 +81,7 @@ jobs:
           POSTGRES_PASSWORD: kittygram_password
           DB_HOST: 127.0.0.1
           DB_PORT: '5432'
-        run: python manage.py test cats
+        run: python manage.py test cats collaborations
 
   frontend-build:
     name: Frontend production build

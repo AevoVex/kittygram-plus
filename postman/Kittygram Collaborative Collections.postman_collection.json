@@ -1,0 +1,121 @@
+{
+  "info": {
+    "_postman_id": "b8a1b547-bbb7-4a3c-8dd7-6a13a7d6ed44",
+    "name": "Kittygram Collaborative Collections",
+    "description": "Проверка API совместных подборок и заявок на добавление котиков.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "ownerAccessToken", "value": ""},
+    {"key": "editorAccessToken", "value": ""},
+    {"key": "outsiderAccessToken", "value": ""},
+    {"key": "collectionId", "value": "1"},
+    {"key": "editorUserId", "value": "2"},
+    {"key": "ownerCatId", "value": "1"},
+    {"key": "outsiderCatId", "value": "16"},
+    {"key": "proposalId", "value": "1"}
+  ],
+  "item": [
+    {
+      "name": "Авторизация",
+      "item": [
+        {
+          "name": "Получить JWT владельца",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"owner\",\n  \"password\": \"<password>\"\n}"},
+            "url": "{{baseUrl}}/auth/jwt/create/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Подборки",
+      "item": [
+        {
+          "name": "Создать подборку",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{ownerAccessToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Коты из приютов\",\n  \"description\": \"Питомцы, которым нужен дом\"\n}"},
+            "url": "{{baseUrl}}/api/collections/"
+          }
+        },
+        {
+          "name": "Получить мои подборки с фильтром роли",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{ownerAccessToken}}"}],
+            "url": "{{baseUrl}}/api/collections/?role=owner&page=1"
+          }
+        },
+        {
+          "name": "Пригласить редактора",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{ownerAccessToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"user_id\": {{editorUserId}},\n  \"role\": \"editor\"\n}"},
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/members/"
+          }
+        },
+        {
+          "name": "Список участников",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{ownerAccessToken}}"}],
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/members/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Заявки котиков",
+      "item": [
+        {
+          "name": "Предложить собственного котика",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{outsiderAccessToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"cat_id\": {{outsiderCatId}}\n}"},
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/proposals/"
+          }
+        },
+        {
+          "name": "Посмотреть заявки редактором",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{editorAccessToken}}"}],
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/proposals/"
+          }
+        },
+        {
+          "name": "Одобрить заявку",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{editorAccessToken}}"}],
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/proposals/{{proposalId}}/approve/"
+          }
+        },
+        {
+          "name": "Отклонить заявку",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{editorAccessToken}}"}],
+            "url": "{{baseUrl}}/api/collections/{{collectionId}}/proposals/{{proposalId}}/reject/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Прямое добавление редактором",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Authorization", "value": "Bearer {{ownerAccessToken}}"}, {"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"cat_id\": {{ownerCatId}}\n}"},
+        "url": "{{baseUrl}}/api/collections/{{collectionId}}/cats/"
+      }
+    }
+  ]
+}

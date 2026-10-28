@@ -22,6 +22,15 @@ docker compose up -d --build
 
 Статика backend и frontend складывается в общий volume `static_value`, медиа — в `media_value`.
 
+## API-документация и проверка
+
+- [Контракт API совместных подборок](docs/API_COLLABORATIVE_COLLECTIONS.md)
+- [Postman-коллекция](postman/Kittygram%20Collaborative%20Collections.postman_collection.json)
+- [Полный Postman-прогон всех вариантов](postman/Kittygram%20Full%20API%20Run.postman_collection.json)
+- [Инструкция по Docker и локальной проверке](docs/DOCKER_VERIFICATION.md)
+- [Демо-данные для быстрого тестирования](docs/DEMO_DATA.md)
+- [Черновик курсовой работы](docs/COURSEWORK_COLLABORATIVE_COLLECTIONS.md)
+
 ## Production
 
 В `.env` на сервере укажите реальные значения:

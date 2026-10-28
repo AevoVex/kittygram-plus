@@ -4,12 +4,14 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from cats.views import AchievementViewSet, CatViewSet, LightCatViewSet, UserViewSet
+from collaborations.views import CollectionViewSet
 
 router = DefaultRouter()
 router.register('cats', CatViewSet)
 router.register('users', UserViewSet)
 router.register('achievements', AchievementViewSet)
 router.register('mycats', LightCatViewSet, basename='light-cat')
+router.register('collections', CollectionViewSet, basename='collection')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('djoser.urls')),
