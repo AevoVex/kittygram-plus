@@ -2,14 +2,18 @@ name: Kittygram Plus CI
 
 on:
   push:
-    branches: [kittygram-plus]
+    branches: [main]
     paths:
-      - 'kittygram-plus/**'
-      - '.github/workflows/kittygram-plus.yml'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'gateway/**'
+      - '.github/workflows/main.yml'
   pull_request:
     paths:
-      - 'kittygram-plus/**'
-      - '.github/workflows/kittygram-plus.yml'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'gateway/**'
+      - '.github/workflows/main.yml'
   workflow_dispatch:
 
 permissions:
@@ -43,14 +47,14 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: kittygram-plus/backend/requirements.txt
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install backend dependencies
-        working-directory: kittygram-plus/backend
+        working-directory: backend
         run: python -m pip install -r requirements.txt
 
       - name: Django system checks
-        working-directory: kittygram-plus/backend
+        working-directory: backend
         env:
           DJANGO_DEBUG: '0'
           DJANGO_SECRET_KEY: ci-only-secret-key
@@ -65,7 +69,7 @@ jobs:
           python manage.py makemigrations --check --dry-run
 
       - name: Run backend tests
-        working-directory: kittygram-plus/backend
+        working-directory: backend
         env:
           DJANGO_DEBUG: '0'
           DJANGO_SECRET_KEY: ci-only-secret-key
@@ -89,14 +93,14 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: kittygram-plus/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: kittygram-plus/frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Build frontend
-        working-directory: kittygram-plus/frontend
+        working-directory: frontend
         run: npm run build
 
   docker-build:
@@ -113,24 +117,24 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/backend
-          file: kittygram-plus/backend/Dockerfile
+          context: backend
+          file: backend/Dockerfile
           push: false
           tags: kittygram-plus-backend:ci
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/frontend
-          file: kittygram-plus/frontend/Dockerfile
+          context: frontend
+          file: frontend/Dockerfile
           push: false
           tags: kittygram-plus-frontend:ci
 
       - name: Build gateway image
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/gateway
-          file: kittygram-plus/gateway/Dockerfile
+          context: gateway
+          file: gateway/Dockerfile
           push: false
           tags: kittygram-plus-gateway:ci
 
@@ -138,7 +142,7 @@ jobs:
     name: Publish production images
     runs-on: ubuntu-latest
     needs: [backend-tests, frontend-build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/kittygram-plus'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -155,24 +159,24 @@ jobs:
       - name: Publish backend
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/backend
-          file: kittygram-plus/backend/Dockerfile
+          context: backend
+          file: backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/kittygram_plus_backend:latest
 
       - name: Publish frontend
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/frontend
-          file: kittygram-plus/frontend/Dockerfile
+          context: frontend
+          file: frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/kittygram_plus_frontend:latest
 
       - name: Publish gateway
         uses: docker/build-push-action@v6
         with:
-          context: kittygram-plus/gateway
-          file: kittygram-plus/gateway/Dockerfile
+          context: gateway
+          file: gateway/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/kittygram_plus_gateway:latest
 
@@ -191,7 +195,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             set -eu
-            cd ~/kittygram-plus/kittygram-plus
+            cd ~/kittygram-plus
             docker compose -f docker-compose.production.yml pull
             docker compose -f docker-compose.production.yml up -d --force-recreate
             docker compose -f docker-compose.production.yml exec -T backend python manage.py migrate --no-input
