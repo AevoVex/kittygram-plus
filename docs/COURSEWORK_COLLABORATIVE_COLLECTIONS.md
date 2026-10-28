@@ -1,8 +1,8 @@
 # Курсовая работа: совместные подборки котиков в Kittygram
 
-> Статус документа: проектное решение для творческого задания. Описанная ниже
-> функциональность **ещё не реализована**. Существующая база проекта отмечена
-> отдельно, чтобы в итоговой курсовой не выдать планируемое за готовое.
+> Статус документа: описание реализованного решения для творческого задания.
+> Указанные API, тесты, документация, диаграммы и production-деплой проверены;
+> доказательства собраны в `docs/evidence/`.
 
 ## Тема, цель и задачи работы
 
@@ -30,7 +30,8 @@
    развёртывания.
 
 **Используемые технологии:** Python, Django, Django REST Framework, Djoser,
-> Simple JWT, django-filter, PostgreSQL, Docker Compose, Nginx и React.
+> Simple JWT, django-filter, drf-spectacular, PostgreSQL, Docker Compose, Nginx
+> и React.
 
 ---
 
@@ -54,10 +55,10 @@
 | JWT, регистрация и API текущего пользователя | Уже реализовано |
 | Пагинация и фильтрация списка котиков | Уже реализовано |
 | Docker Compose, PostgreSQL-конфигурация, Nginx | Реализовано и локально проверено: сборка, миграции и защищённый API через Nginx |
-| Совместные подборки и роли участников | Реализовано в исходном коде; выполнение тестов локально ещё не подтверждено |
-| Документация нового API и Postman | Реализовано; диаграммы остаются в плане |
-| Успешный запуск тестов в текущем рабочем окружении | Подтверждён: `manage.py check`, проверка миграций и 38 тестов `cats`/`collaborations` выполнены в Docker Compose с PostgreSQL |
-| Работающий внешний деплой | Не подтверждён |
+| Совместные подборки и роли участников | Реализовано и покрыто автоматическими тестами |
+| Документация нового API и Postman | Реализованы: Swagger/OpenAPI, Markdown-контракт, Postman, Use Case и Deployment-диаграммы |
+| Успешный запуск тестов в текущем рабочем окружении | Подтверждён: `manage.py check`, OpenAPI-валидация и 39 тестов `cats`/`collaborations` выполнены в Docker Compose с PostgreSQL |
+| Работающий внешний деплой | Подтверждён: GitHub Actions CI/CD завершён успешно; Swagger, OpenAPI и защищённый endpoint доступны через Nginx |
 
 ## 1.2. Описание идеи и пользовательский сценарий
 
@@ -164,8 +165,9 @@ Cat 1 --- * CollectionCatProposal  (котик в заявке)
 6. Читатель просматривает подборку и список участников.
 7. Участник ищет свои подборки и отфильтровывает их по роли.
 
-В итоговой работе этот раздел будет преобразован в диаграмму Use Case с
-> указанными актёрами и сценариями.
+Диаграмма Use Case подготовлена в PlantUML и доступна вместе с PNG-версией:
+[`use-case-collaborations.puml`](diagrams/use-case-collaborations.puml),
+[`use-case-collaborations.png`](diagrams/use-case-collaborations.png).
 
 ## 2.5. API-контракт
 
@@ -368,8 +370,21 @@ Cat 1 --- * CollectionCatProposal  (котик в заявке)
 > Nginx. Временный Compose-проект после проверки удалён. Внешний деплой,
 > production-секреты, домен и HTTPS не проверялись.
 
-Для диаграммы Deployment будут отражены: клиент, Nginx, Django/DRF, PostgreSQL,
-> Docker Compose, сеть/порты и volume для медиа.
+Диаграмма Deployment подготовлена в PlantUML и показывает клиент, CI/CD,
+Docker Hub, Nginx, Django/DRF, PostgreSQL и именованные volumes:
+[`deployment.puml`](diagrams/deployment.puml),
+[`deployment.png`](diagrams/deployment.png).
+
+## 5.1. Доказательства работы
+
+Реальные скриншоты опубликованного экземпляра и описание условий получения
+находятся в [`docs/evidence/README.md`](evidence/README.md):
+
+- [`swagger-ui.png`](evidence/swagger-ui.png) — интерактивная документация;
+- [`collections-401.png`](evidence/collections-401.png) — корректная защита
+  `GET /api/collections/` без токена;
+- [`ci-cd-success.png`](evidence/ci-cd-success.png) — успешное прохождение
+  GitHub Actions CI/CD от 28.10.2026.
 
 # Заключение
 

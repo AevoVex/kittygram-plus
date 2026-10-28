@@ -31,6 +31,8 @@ docker compose up -d --build
 - [Инструкция по Docker и локальной проверке](docs/DOCKER_VERIFICATION.md)
 - [Демо-данные для быстрого тестирования](docs/DEMO_DATA.md)
 - [Черновик курсовой работы](docs/COURSEWORK_COLLABORATIVE_COLLECTIONS.md)
+- [Use Case и Deployment-диаграммы](docs/diagrams/)
+- [Скриншоты доказательств](docs/evidence/README.md)
 
 ## Production
 

@@ -1,0 +1,67 @@
+@startuml
+title Варианты использования: совместные подборки Kittygram Plus
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F7FBFF
+  BorderColor #3A6EA5
+}
+
+actor "Авторизованный\nпользователь" as User
+actor "Владелец\nподборки" as Owner
+actor "Редактор" as Editor
+actor "Читатель" as Viewer
+
+Owner -|> User
+Editor -|> User
+Viewer -|> User
+
+rectangle "Kittygram Plus API — совместные подборки" {
+  usecase "Создать подборку" as UC_Create
+  usecase "Предложить\nсобственного котика" as UC_Propose
+  usecase "Просмотреть подборку\nи участников" as UC_View
+  usecase "Искать и фильтровать\nсвои подборки" as UC_Search
+  usecase "Пригласить участника" as UC_Invite
+  usecase "Изменить роль /\nудалить участника" as UC_Members
+  usecase "Изменить / удалить\nподборку" as UC_ManageCollection
+  usecase "Добавить собственного\nкотика в подборку" as UC_AddCat
+  usecase "Удалить котика\nиз подборки" as UC_RemoveCat
+  usecase "Просмотреть заявки" as UC_ListProposals
+  usecase "Одобрить / отклонить\nзаявку" as UC_Review
+  usecase "Проверить права,\nроль и валидации" as UC_Validate
+}
+
+User --> UC_Create
+User --> UC_Propose
+User --> UC_Search
+Owner --> UC_View
+Editor --> UC_View
+Viewer --> UC_View
+Owner --> UC_Invite
+Owner --> UC_Members
+Owner --> UC_ManageCollection
+Owner --> UC_AddCat
+Owner --> UC_RemoveCat
+Editor --> UC_AddCat
+Editor --> UC_RemoveCat
+Owner --> UC_ListProposals
+Editor --> UC_ListProposals
+Owner --> UC_Review
+Editor --> UC_Review
+
+UC_Create .> UC_Validate : <<include>>
+UC_Propose .> UC_Validate : <<include>>
+UC_Invite .> UC_Validate : <<include>>
+UC_Members .> UC_Validate : <<include>>
+UC_AddCat .> UC_Validate : <<include>>
+UC_RemoveCat .> UC_Validate : <<include>>
+UC_Review .> UC_Validate : <<include>>
+
+note bottom of UC_Validate
+  Проверяются роль участника,
+  принадлежность котика, уникальность
+  членства/заявки и статус заявки.
+end note
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+title Диаграмма развёртывания Kittygram Plus
+top to bottom direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+actor "Пользователь\n(браузер / Postman)" as Client
+
+cloud "GitHub Actions" as CI {
+  component "CI: tests, build,\npublish, deploy" as Pipeline
+}
+cloud "Docker Hub" as Hub
+
+node "VPS 89.125.39.139\nDocker Compose" as VPS {
+  node "gateway\nNginx :80\nпубличный :8080" as Gateway
+  node "backend\nDjango REST + Gunicorn :8000" as Backend
+  database "db\nPostgreSQL 16" as DB
+  node "frontend\nReact build copier" as Frontend
+
+  folder "static_value" as Static
+  folder "media_value" as Media
+  folder "pg_data" as PgData
+}
+
+Client --> Gateway : HTTPS/HTTP\n/api/, /auth/, /api/docs/
+Gateway --> Backend : reverse proxy
+Gateway --> Static : React + Django static
+Gateway --> Media : /media/
+Backend --> DB : PostgreSQL :5432
+Backend --> Static : collectstatic
+Backend --> Media : uploads
+Frontend --> Static : build files
+DB --> PgData : persistent data
+
+Pipeline --> Hub : push images\nbackend, frontend, gateway
+Pipeline --> VPS : SSH deploy\npull + compose up
+Hub --> VPS : pull latest images
+
+note right of Gateway
+  Swagger UI: /api/docs/
+  OpenAPI: /api/schema/
+end note
+
+note bottom of Backend
+  Entry point запускает migrate
+  и collectstatic последовательно.
+end note
+@enduml
